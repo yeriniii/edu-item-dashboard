@@ -1,18 +1,25 @@
 import streamlit as st
-from utils import load_pri_excel,make_usable_df
-from dashboard import render_dashboard
+from utils import load_data_excel,make_usable_df
+from dashboard.page import render_dashboard
+import pandas as pd
 
-st.set_page_config(page_title="PRI 대시보드", layout="wide")
-st.title("📊 PRI 대시보드")
+st.set_page_config(page_title="대시보드", layout="wide")
+st.title("📊 대시보드")
 
-uploaded = st.file_uploader("엑셀 업로드 (.xlsx) — 시트명은 PRI로 고정", type=["xlsx"])
-if uploaded is None:
-    st.info("엑셀 파일을 업로드하세요. (원본 데이터 시트 이름: PRI)")
+uploads = st.file_uploader("엑셀 업로드 (.xlsx) — 시트명은 data로 고정", type=["xlsx"],accept_multiple_files=True)
+if not uploads:
+    st.info("엑셀파일을 1개 이상 업로드하세요. (시트 이름: data)")
     st.stop()
 
 try:
-    df_raw = load_pri_excel(uploaded.getvalue(), sheet_name="PRI")
+    dfs=[]
+    for f in uploads:
+        df=load_data_excel(f.getvalue(),sheet_name="data")
+        dfs.append(df)
+
+    df_raw = pd.concat(dfs, ignore_index=True)
     df_use = make_usable_df(df_raw)
+
 except Exception as e:
     st.error(str(e))
     st.stop()
