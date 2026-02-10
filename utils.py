@@ -11,6 +11,7 @@ COL_TYPE = "유형"
 COL_STD = "성취기준"
 COL_COPY = "저작권"          # 1/0
 COL_NOEXPL = "해설없는문항" # 1/0
+COL_SCH_LVL = "학교급"
 
 REQUIRED_COLS = [
     COL_KEY, COL_SCH, COL_GRADE, COL_SUBJECT, COL_DIFF, COL_TYPE, COL_STD,
@@ -58,4 +59,11 @@ def make_usable_df(df_raw: pd.DataFrame) -> pd.DataFrame:
     df[COL_SUBJECT] = df[COL_SUBJECT].astype(str).str.strip()
     df.loc[df[COL_SUBJECT].isin(["", "nan", "None", "0", "0.0"]), COL_SUBJECT] = pd.NA
     df = df[df[COL_SUBJECT].notna()].copy()
+
+    school_map = {"PRI": "초등", "JHS": "중등", "HSC": "고등"}
+    order = ["초등", "중등", "고등"]
+
+    df[COL_SCH_LVL] = df[COL_SCH].map(school_map)
+    df[COL_SCH_LVL] = pd.Categorical(df[COL_SCH_LVL], categories=order, ordered=True)
+
     return df

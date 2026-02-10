@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from .constants import DIFF_ORDER, TYPE_ORDER
+from .constants import DIFF_ORDER, TYPE_ORDER,SUB_ORDER
 
 
 def bar_count_ratio(df, col, title, order=None, vertical=True, show_table=True):
@@ -89,4 +89,4 @@ def render_charts(df):
 
     st.subheader("과목 분포")
     # 과목은 항목이 길고 많아서 세로막대면 글자 회전/겹침이 심함 → 가로막대 추천
-    bar_count_ratio(df, col="전문항과목", title="과목 분포",vertical=False, show_table=True)
+    bar_count_ratio(df, col="전문항과목", title="과목 분포",order=SUB_ORDER,vertical=False, show_table=True)

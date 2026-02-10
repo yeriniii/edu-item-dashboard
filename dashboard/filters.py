@@ -6,6 +6,7 @@ COL_GRADE = "전문항학년"
 COL_SUBJECT = "전문항과목"
 COL_DIFF = "난이도"
 COL_TYPE = "유형"
+COL_SCH_LVL="학교급"
 
 DIFF_ORDER = ["상", "중상", "중", "중하", "하"]
 TYPE_ORDER = ["객관식", "주관식", "기타"]
@@ -25,11 +26,11 @@ def render_filters(df_use: pd.DataFrame):
         st.header("필터")
 
         # 1) 학교 (최상위)
-        opt_sch = _options(df_use, COL_SCH)
-        f_sch = st.multiselect("학교", opt_sch, key="f_school",format_func=lambda x: SCH_LABEL.get(x, x))
+        opt_sch = _options(df_use, COL_SCH_LVL)
+        f_sch = st.multiselect("학교", opt_sch, key="f_school")
 
         # 학교 선택 반영한 임시 df
-        df1 = df_use[df_use[COL_SCH].isin(f_sch)] if f_sch else df_use
+        df1 = df_use[df_use[COL_SCH_LVL].isin(f_sch)] if f_sch else df_use
 
         # 2) 학년 (학교에 따라 옵션이 달라짐)
         opt_grade = _options(df1, COL_GRADE)
@@ -55,7 +56,7 @@ def render_filters(df_use: pd.DataFrame):
         f_type = st.multiselect("유형", opt_type, key="f_type")
 
     return {
-        COL_SCH: f_sch,
+        COL_SCH_LVL: f_sch,
         COL_GRADE: f_grade,
         COL_SUBJECT: f_subj,
         COL_DIFF: f_diff,
