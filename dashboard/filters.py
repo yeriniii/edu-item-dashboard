@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from .constants import DIFF_ORDER, TYPE_ORDER
+from .constants import DIFF_ORDER, TYPE_ORDER, SUB_ORDER
 
 COL_SCH = "학교"
 COL_GRADE = "전문항학년"
@@ -23,7 +23,13 @@ def _options(df: pd.DataFrame, col: str):
     s = df[col].dropna().astype(str).str.strip()
     # 공백/NaN 문자열/0 제거
     s = s[~s.isin(["", "nan", "None", "0", "0.0"])]
-    return sorted(s.unique().tolist())
+    unique = s.unique().tolist()
+    # 과목: SUB_ORDER 순서로 정렬, 없는 과목은 뒤에
+    if col == COL_SUBJECT:
+        in_order = [v for v in SUB_ORDER if v in unique]
+        extra = sorted([v for v in unique if v not in SUB_ORDER])
+        return in_order + extra
+    return sorted(unique)
 
 def render_filters(df_use: pd.DataFrame):
     with st.sidebar:
