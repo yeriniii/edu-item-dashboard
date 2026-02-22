@@ -1,6 +1,6 @@
 import streamlit as st
 from .overview import render_overview
-from .filters import render_filters, apply_filters
+from .filters import render_filters, apply_filters, render_filter_summary
 from .kpi import compute_kpis, render_kpis
 from .charts import render_charts
 from .std_top import render_std_top
@@ -8,7 +8,7 @@ from .std_top import render_std_top
 def render_dashboard(df_use, df_raw=None):
     # ✅ 탭 대신 선택형 네비게이션 (선택값이 생겨서 조건 분기가 가능)
     mode = st.segmented_control(
-        "보기",
+        "",
         options=["📌 전체개요", "🔎 상세분석"],
         default="📌 전체개요",
     )
@@ -35,6 +35,10 @@ def render_dashboard(df_use, df_raw=None):
     df_f = apply_filters(df_use, filters)
 
     kpis = compute_kpis(df_raw=df_raw, df_use=df_use, df_filtered=df_f)
+
+    # 적용된 필터 한눈에 보기 (상단 요약)
+    #srender_filter_summary(filters)
+
     render_kpis(kpis)
 
     if not any(filters.values()):

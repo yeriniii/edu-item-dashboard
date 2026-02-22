@@ -85,9 +85,8 @@ def render_overview(df: pd.DataFrame):
         st.caption("※ 전체 기준 요약 (필터 미적용)")
 
 
-    # 3) 학교급 요약표 (문항수 + 유형% + 난이도%)
-    st.caption("학교급별 요약 (문항수/유형비율/난이도비율)")
-
+    # 3) 학교급 요약표 (문항수 + 유형별 / 난이도별 값(비율%))
+    # 공통: 학교급별 전체 문항수
     n = (
         df_ov
         .groupby(COL_SCH_LVL)
@@ -96,14 +95,42 @@ def render_overview(df: pd.DataFrame):
         .rename("문항수")
     )
 
-    type_pct = pd.crosstab(df_ov[COL_SCH_LVL], df_ov[COL_TYPE], normalize="index").reindex(order).add_prefix("유형_")
-    diff_pct = pd.crosstab(df_ov[COL_SCH_LVL], df_ov[COL_DIFF], normalize="index").reindex(order).add_prefix("난이도_")
+    # 3-1) 학교급별 유형 요약
+    st.caption("학교급별 요약 - 유형별 (문항수 / 값(비율%))")
 
-    summary = pd.concat([n, type_pct, diff_pct], axis=1).reset_index()
+    type_ct = pd.crosstab(df_ov[COL_SCH_LVL], df_ov[COL_TYPE]).reindex(order)
+    type_pct = pd.crosstab(
+        df_ov[COL_SCH_LVL],
+        df_ov[COL_TYPE],
+        normalize="index"
+    ).reindex(order)
 
-    # 보기 좋게 퍼센트 컬럼만 %로 표시하고 싶으면 st.dataframe은 그대로 두고,
-    # 표시용으로 round만 해도 충분함
-    pct_cols = [c for c in summary.columns if c.startswith("유형_") or c.startswith("난이도_")]
-    summary[pct_cols] = summary[pct_cols].round(4)
+    type_summary = pd.DataFrame(index=type_ct.index)
+    for col in type_ct.columns:
+        cnt = type_ct[col].fillna(0).astype(int)
+        pct = (type_pct[col].fillna(0) * 100).round(1)
+        type_summary[f"유형_{col}"] = cnt.astype(str) + " (" + pct.astype(str) + "%)"
 
-    st.dataframe(summary, use_container_width=True)
+    summary_type = pd.concat([n, type_summary], axis=1).reset_index()
+    st.dataframe(summary_type, use_container_width=True)
+
+    # 3-2) 학교급별 난이도 요약
+    st.caption("학교급별 요약 - 난이도별 (문항수 / 값(비율%))")
+
+    diff_ct = pd.crosstab(df_ov[COL_SCH_LVL], df_ov[COL_DIFF]).reindex(order)
+    diff_ct = diff_ct.reindex(columns=[d for d in DIFF_ORDER if d in diff_ct.columns])
+    diff_pct = pd.crosstab(
+        df_ov[COL_SCH_LVL],
+        df_ov[COL_DIFF],
+        normalize="index"
+    ).reindex(order)
+    diff_pct = diff_pct.reindex(columns=[d for d in DIFF_ORDER if d in diff_pct.columns])
+
+    diff_summary = pd.DataFrame(index=diff_ct.index)
+    for col in diff_ct.columns:
+        cnt = diff_ct[col].fillna(0).astype(int)
+        pct = (diff_pct[col].fillna(0) * 100).round(1)
+        diff_summary[f"난이도_{col}"] = cnt.astype(str) + " (" + pct.astype(str) + "%)"
+
+    summary_diff = pd.concat([n, diff_summary], axis=1).reset_index()
+    st.dataframe(summary_diff, use_container_width=True)

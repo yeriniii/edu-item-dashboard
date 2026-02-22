@@ -34,6 +34,8 @@ def load_data_excel(file_bytes: bytes, sheet_name: str = "data") -> pd.DataFrame
 
     return df
 
+
+@st.cache_data(show_spinner="데이터 전처리 중...")
 def make_usable_df(df_raw: pd.DataFrame) -> pd.DataFrame:
 
     df=df_raw.copy()
